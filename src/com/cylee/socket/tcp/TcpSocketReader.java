@@ -75,6 +75,7 @@ public class TcpSocketReader implements Runnable{
             } catch (Exception e) {
             }
         }
+        Thread.currentThread().interrupt();
     }
 
     public interface ReadListener {

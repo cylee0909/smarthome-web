@@ -40,6 +40,7 @@ public class TcpSocketWriter implements Runnable{
                 e.printStackTrace();
             }
         }
+        Thread.currentThread().interrupt();
     }
 
     public void offerData(String data) {

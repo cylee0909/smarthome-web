@@ -20,11 +20,15 @@ public class DataChannel implements TcpSocketReader.ReadListener{
     TcpSocketWriter writer;
     ClientAddress address;
 
-    private boolean mStoped;
+    private volatile boolean mStoped;
     public Map<String, PacketBindData> mBindDataMap = Collections.synchronizedMap(new HashMap<String, PacketBindData>());
     private int mId;
 
     public DataChannel() {
+    }
+
+    public ClientAddress getAddress() {
+        return address;
     }
 
     public void setReader(TcpSocketReader reader) {
@@ -91,7 +95,7 @@ public class DataChannel implements TcpSocketReader.ReadListener{
             reader.stop();
         }
         mStoped = true;
-        ConnectManager.getInstance().removeChannel(this);
+        ConnectManager2.getInstance().removeChannel(this);
     }
 
     @Override
@@ -107,6 +111,12 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                 if (addressDataWithId.length() > 2) {
                     String addressData = addressDataWithId.substring(2);
                     String id = addressDataWithId.substring(0, 2);
+                    // 老的连接还在,但是客户端再次初始化了,我们关闭之前的连接
+                    DataChannel oldChannel = ConnectManager2.getInstance().getChannel(id);
+                    if (oldChannel != null) {
+                        Log.d("close old channel = "+oldChannel.address);
+                        oldChannel.closeChannel();
+                    }
                     Log.d("rec SETID address = "+addressData);
                     address = ClientAddress.fromJson(addressData);
                     if (address != null) {
@@ -116,16 +126,10 @@ public class DataChannel implements TcpSocketReader.ReadListener{
                             new Thread(new TimeOutChecker()).start();
                         } catch (IOException e){
                             e.printStackTrace();
-                            mStoped = true;
-                            try {
-                                reader.stop();
-                                reader.getSocket().close();
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
-                            }
+                            closeChannel();
                             return;
                         }
-                        ConnectManager.getInstance().registerClientChannel(this);
+                        ConnectManager2.getInstance().registerClientChannel(this);
                         writer.offerData(id + "OK^");
                     }
                 }

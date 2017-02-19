@@ -1,8 +1,9 @@
 package com.cylee.smarthome;
 
+import com.cylee.netty.ConnectManager;
+import com.cylee.netty.NettyChannel;
 import com.cylee.smarthome.model.BaseModel;
-import com.cylee.smarthome.model.Config;
-import com.cylee.socket.tcp.ConnectManager;
+import com.cylee.smarthome.model.ClientAddress;
 import com.cylee.web.Log;
 
 import javax.servlet.ServletException;
@@ -12,6 +13,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Created by cylee on 16/12/18.
@@ -30,7 +33,16 @@ public class ListServlet extends HttpServlet{
         BaseModel result = null;
         Log.d("list name = "+name);
         if ("cylee".equals(name) && "lcy140547".equals(pw)) {
-            result = BaseModel.buildSuccess(ConnectManager.getInstance().allChannels());
+            Collection<NettyChannel> allChannels = ConnectManager.getInstance().allChannels().values();
+            if (allChannels != null) {
+                ArrayList<ClientAddress> addresses = new ArrayList<ClientAddress>();
+                for (NettyChannel channel : allChannels) {
+                    addresses.add(channel.getAddress());
+                }
+                result = BaseModel.buildSuccess(addresses);
+            } else {
+                result = BaseModel.buildSuccess(null);
+            }
         } else {
             result = BaseModel.buildInvalidInput();
         }

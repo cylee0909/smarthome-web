@@ -1,10 +1,10 @@
 package com.cylee.smarthome;
 
+import com.cylee.netty.ConnectManager;
+import com.cylee.netty.NettyChannel;
+import com.cylee.netty.SendDataListener;
 import com.cylee.smarthome.model.BaseModel;
 import com.cylee.smarthome.model.ExecMode;
-import com.cylee.socket.tcp.ConnectManager;
-import com.cylee.socket.tcp.DataChannel;
-import com.cylee.socket.tcp.SendDataListener;
 import com.cylee.web.Log;
 
 import javax.servlet.AsyncContext;
@@ -32,7 +32,7 @@ public class ExecCommand extends HttpServlet {
         String id = req.getParameter("appid");
         BaseModel result = null;
         if (id != null && !"".equals(id)) {
-            DataChannel channel = ConnectManager.getInstance().getChannel(id);
+            NettyChannel channel = ConnectManager.getInstance().getChannel(id);
             if (channel != null) {
                 String command = req.getParameter("command");
                 final AsyncContext context = req.startAsync();

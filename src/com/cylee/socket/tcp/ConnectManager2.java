@@ -10,23 +10,23 @@ import java.util.*;
 /**
  * Created by cylee on 16/12/19.
  */
-public class ConnectManager implements Runnable {
+public class ConnectManager2 implements Runnable {
     private ServerSocket mSocket;
     private int mPort;
     private Map<String, DataChannel> mClients = Collections.synchronizedMap(new HashMap<>());
     private volatile boolean mStoped;
-    private static ConnectManager manager;
+    private static ConnectManager2 manager;
 
-    public static ConnectManager getInstance() {
+    public static ConnectManager2 getInstance() {
         if (manager == null) {
-            synchronized (ConnectManager.class) {
-                manager = new ConnectManager();
+            synchronized (ConnectManager2.class) {
+                manager = new ConnectManager2();
             }
         }
         return manager;
     }
 
-    public ConnectManager init(int port) {
+    public ConnectManager2 init(int port) {
         mPort = port;
         return this;
     }
@@ -65,18 +65,40 @@ public class ConnectManager implements Runnable {
         mSocket = new ServerSocket(port);
         while (!mStoped) {
             Socket socket = mSocket.accept();
+            TcpSocketReader reader = null;
+            DataChannel channel = null;
             try {
-                TcpSocketReader reader = new TcpSocketReader(socket);
-                reader.registerChannel(new DataChannel());
+                reader = new TcpSocketReader(socket);
+                channel = new DataChannel();
+                reader.registerChannel(channel);
                 new Thread(reader).start();
             } catch (Exception e) {
                 e.printStackTrace();
+                if (reader != null) {
+                    reader.stop();
+                }
+                if (channel != null) {
+                    channel.closeChannel();
+                }
             }
         }
     }
 
     public void stop() {
         mStoped = true;
+        if (mClients != null) {
+            for (DataChannel channel : mClients.values()) {
+                if (channel != null) {
+                    channel.closeChannel();
+                }
+            }
+        }
+        if (mSocket != null) {
+            try {
+                mSocket.close();
+            } catch (Exception e) {
+            }
+        }
     }
 
     public String getLoginId(String name, String passd) {

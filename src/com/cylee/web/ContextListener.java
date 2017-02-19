@@ -1,6 +1,6 @@
 package com.cylee.web;
 
-import com.cylee.socket.tcp.ConnectManager;
+import com.cylee.netty.ConnectManager;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -19,5 +19,6 @@ public class ContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
+        ConnectManager.getInstance().stop();
     }
 }
