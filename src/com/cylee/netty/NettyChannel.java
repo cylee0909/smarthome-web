@@ -3,6 +3,9 @@ package com.cylee.netty;
 import com.cylee.smarthome.model.ClientAddress;
 import io.netty.channel.socket.SocketChannel;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 /**
  * Created by cylee on 17/2/11.
  */
