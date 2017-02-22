@@ -85,7 +85,7 @@ public class ConnectManager implements Runnable {
                 @Override
                 protected void initChannel(NioSocketChannel serverChannel) throws Exception {
                     ChannelPipeline p = serverChannel.pipeline();
-                    p.addLast(new LineBasedFrameDecoder(1024 * 1024));
+                    p.addLast(new LineBasedFrameDecoder(Integer.MAX_VALUE));
                     p.addLast(new StringDecoder());
                     p.addLast(new StringEncoder());
                     p.addLast(new NettyServerHandler());
